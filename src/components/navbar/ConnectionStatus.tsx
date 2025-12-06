@@ -21,9 +21,7 @@ const ConnectionStatus: React.FC = () => {
   }
 
   const statusText = isOnline 
-    ? lastHeartbeat 
-      ? `Connected • ${getRelativeTime(lastHeartbeat)}`
-      : 'Connected'
+    ? 'Connected'
     : 'Disconnected'
 
   const formatDateTime = (timestamp: string | null) => {
