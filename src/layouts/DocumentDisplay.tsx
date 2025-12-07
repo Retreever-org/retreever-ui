@@ -4,6 +4,7 @@ import { CodeBlock } from "../components/documentation/CodeBlock";
 import { CheckIcon, ErrorIcon, InfoIcon, SparkIcon } from "../svgs/svgs";
 import type { FieldMetadata } from "../types/response.types";
 import Metadata from "../components/documentation/Metadata";
+import RequestParamView from "../components/documentation/RequestParamView";
 
 const DocumentDisplay: React.FC = () => {
   const endpoint = useViewingEndpoint();
@@ -52,6 +53,12 @@ const DocumentDisplay: React.FC = () => {
       </div>
 
       {/* REQUEST SECTION */}
+
+      <RequestParamView 
+        headers={endpoint?.headers}
+        pathVariables={endpoint?.path_variables}
+        queryParams={endpoint?.query_params}
+      />
 
       {request && (
         <SwitchableViewWithTitle
