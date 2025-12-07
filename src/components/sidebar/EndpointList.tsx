@@ -44,7 +44,7 @@ export const EndpointList: React.FC<EndpointListProps> = ({
         return (
           <div
             key={`${collectionName}-${endpoint.method}-${endpoint.path}`}
-            className="flex items-center rounded-md px-6 py-0.5 text-[0.8rem] text-surface-200 hover:bg-surface-700/40 cursor-pointer"
+            className="flex items-center rounded-md px-6 py-0.5 text-[0.8rem] text-surface-200 hover:bg-white/5 cursor-pointer"
             onClick={() => handleClick(endpoint.method, endpoint.path)}
           >
             {/* Fixed-width method column */}

@@ -22,9 +22,7 @@ const SidebarRight: React.FC = () => {
 export default SidebarRight
 
 
-// ----------------------------
-// Button Component
-// ----------------------------
+// ---------------------------- Button Component ----------------------------
 function Button({
   icon,
   onClick,
@@ -35,9 +33,18 @@ function Button({
   return (
     <button
       onClick={onClick}
-      className="w-full py-6 border-b border-surface-500/30 transition-colors flex justify-center items-center hover:bg-surface-800"
+      className="
+        w-full py-6 border-b border-surface-500/30 
+        flex justify-center items-center 
+        hover:bg-surface-800 
+        transition-all
+      "
     >
-      {icon}
+      {/* Icon wrapper — only this animates */}
+      <span className="transition-transform active:scale-90 active:-translate-y-[0.05px]">
+        {icon}
+      </span>
     </button>
   )
 }
+

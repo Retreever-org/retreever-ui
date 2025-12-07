@@ -88,7 +88,7 @@ const Sidebar: React.FC = () => {
                 onClick={() => toggleCollection(collection.name)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1 
                            text-left text-sm text-surface-100 
-                           hover:bg-surface-700/40 focus:outline-none"
+                           hover:bg-white/5 focus:outline-none"
               >
                 {isOpen ? (
                   <FolderOpenIcon className="h-4 w-4 text-surface-200" />
