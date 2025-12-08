@@ -1,11 +1,12 @@
 import Canvas from "./layouts/Canvas";
 import { Navbar } from "./layouts/Navbar";
 import Sidebar from "./layouts/Sidebar";
-import SidebarRight from "./layouts/SidebarRight";
 import { useIsInitializing } from "./stores/doc-store";
 import { useAppInitializer } from "./hooks/useAppInitializer";
 import { useApiHealthMonitor } from "./hooks/useApiHealthMonitor";
 import { FloatingDock } from "./layouts/FloatingDock";
+import UtilityBar from "./layouts/UtilityBar";
+import { RightDisplayPanel } from "./components/utility/RightDisplayPanel";
 
 function App() {
   const isInitializing = useIsInitializing();
@@ -22,30 +23,23 @@ function App() {
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-linear-to-b from-surface-700 to-surface-800 text-gray-300 relative">
-
-      {/* Top navbar */}
       <Navbar />
 
-      {/* Side navbar */}
-      <div className="flex h-[calc(100vh-3rem)] w-full">
+      <div className="flex h-[calc(100vh-3rem)] w-full relative">
         <aside className="w-72 overflow-auto">
           <Sidebar />
         </aside>
 
-        {/* Canvas */}
-        <main className="flex-1 overflow-hidden">
-          <div className="h-full w-full overflow-auto bg-black/10">
-            <Canvas />
-          </div>
+        <main className="flex-1 overflow-hidden bg-black/10">
+          <Canvas />
         </main>
 
-        <aside className="w-12 m-0 overflow-hidden">
-          <SidebarRight />
-        </aside>
+        {/* RIGHT-SIDE STACKED COMPONENTS */}
+        <UtilityBar />
+        <RightDisplayPanel />
       </div>
 
-      {/* Floating Dock */}
-      <FloatingDock/>
+      <FloatingDock />
     </div>
   );
 }
