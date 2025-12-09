@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCollections, useDoc } from "../stores/doc-store";
 import type { Collection } from "../types/filtered.types";
-import { FolderIcon } from "@heroicons/react/16/solid";
 import { EndpointList } from "../components/sidebar/EndpointList";
-import { FolderOpenIcon } from "@heroicons/react/24/outline";
-import { CollapseAll, ExpandAll } from "../svgs/svgs";
+import { CollapseAll, ExpandAll, FolderIcon, FolderOpenIcon } from "../svgs/svgs";
 
 const Sidebar: React.FC = () => {
   const collections = useCollections();
@@ -81,9 +79,14 @@ const Sidebar: React.FC = () => {
                            focus:outline-none"
               >
                 {isOpen ? (
-                  <FolderOpenIcon className="h-4 w-4 text-surface-200" />
+                  <span className="h-4 w-4 text-surface-200">
+                    <FolderOpenIcon />
+                  </span>
+                  
                 ) : (
-                  <FolderIcon className="h-4 w-4 text-surface-200" />
+                  <span className="h-4 w-4 text-surface-200/80">
+                    <FolderIcon />
+                  </span>
                 )}
                 <span className="truncate text-[0.8rem]">{collection.name}</span>
               </button>

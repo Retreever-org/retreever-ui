@@ -1,8 +1,8 @@
 import { Rnd } from "react-rnd"
-import { XMarkIcon } from "@heroicons/react/24/outline"
 import { useDockStore } from "../stores/dock-store"
 import { useEffect, useState } from "react"
 import DocumentDisplay from "./DocumentDisplay"
+import { XMarkIcon } from "../svgs/svgs"
 
 export function FloatingDock() {
   const {
@@ -121,9 +121,11 @@ export function FloatingDock() {
               closeDock()
             }}
             className="h-6 w-6 inline-flex items-center justify-center rounded-md border 
-                       border-surface-500/30 hover:border-rose-500/10 hover:bg-rose-500/20 hover:text-rose-400"
+                       border-surface-500/30 hover:border-rose-500/10 hover:bg-rose-500/20"
           >
-            <XMarkIcon className="h-3.5 w-3.5" />
+            <span className="text-surface-300 hover:text-rose-400">
+              <XMarkIcon />
+            </span>
           </button>
         </div>
 
