@@ -7,11 +7,13 @@ import { useApiHealthMonitor } from "./hooks/useApiHealthMonitor";
 import { FloatingDock } from "./layouts/FloatingDock";
 import UtilityBar from "./layouts/UtilityBar";
 import { RightDisplayPanel } from "./components/utility/RightDisplayPanel";
+import { useEnvInitializer } from "./hooks/useEnvInitializer";
 
 function App() {
   const isInitializing = useIsInitializing();
   useAppInitializer();
   useApiHealthMonitor();
+  useEnvInitializer();
 
   if (isInitializing) {
     return (
