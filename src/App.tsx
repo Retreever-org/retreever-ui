@@ -8,7 +8,7 @@ import { FloatingDock } from "./layouts/FloatingDock";
 import UtilityBar from "./layouts/UtilityBar";
 import { RightDisplayPanel } from "./components/utility/RightDisplayPanel";
 import { useEnvInitializer } from "./hooks/useEnvInitializer";
-import "./services/auto-refresh-service"
+import "./services/auto-refresh-service";
 
 function App() {
   const isInitializing = useIsInitializing();
@@ -29,9 +29,7 @@ function App() {
       <Navbar />
 
       <div className="flex h-[calc(100vh-3rem)] w-full relative">
-        <aside className="w-72 overflow-auto">
-          <Sidebar />
-        </aside>
+        <Sidebar />
 
         <main className="flex-1 overflow-hidden bg-black/10">
           <Canvas />

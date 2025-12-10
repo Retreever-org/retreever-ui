@@ -5,10 +5,43 @@ import type { Collection } from "../types/filtered.types";
 import { EndpointList } from "../components/sidebar/EndpointList";
 import { CollapseAll, ExpandAll, FolderIcon, FolderOpenIcon } from "../svgs/svgs";
 
+const MIN_WIDTH = 288; // w-72
+const MAX_WIDTH_RATIO = 0.3; // 50% screen
+
 const Sidebar: React.FC = () => {
   const collections = useCollections();
   const doc = useDoc();
 
+  // Sidebar width state (smooth & internal)
+  const [width, setWidth] = useState(MIN_WIDTH);
+
+  // --- Resize Handler ---
+  const startResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = width;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const dx = moveEvent.clientX - startX;
+
+      const newWidth = Math.min(
+        Math.max(MIN_WIDTH, startWidth + dx),
+        window.innerWidth * MAX_WIDTH_RATIO
+      );
+
+      setWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  // -------- EXPAND/COLLAPSE ----------
   const [openMap, setOpenMap] = useState<Record<string, boolean>>(() =>
     collections.reduce((acc, col) => {
       acc[col.name] = false;
@@ -16,34 +49,39 @@ const Sidebar: React.FC = () => {
     }, {} as Record<string, boolean>)
   );
 
-  const toggleCollection = (name: string) => {
-    setOpenMap((prev) => ({ ...prev, [name]: !prev[name] }));
-  };
+  const toggleCollection = (name: string) =>
+    setOpenMap(prev => ({ ...prev, [name]: !prev[name] }));
 
-  const expandAll = () => {
+  const expandAll = () =>
     setOpenMap(() =>
       collections.reduce((acc, col) => {
         acc[col.name] = true;
         return acc;
       }, {} as Record<string, boolean>)
     );
-  };
 
-  const collapseAll = () => {
+  const collapseAll = () =>
     setOpenMap(() =>
       collections.reduce((acc, col) => {
         acc[col.name] = false;
         return acc;
       }, {} as Record<string, boolean>)
     );
-  };
 
   return (
-    <div className="border-b h-full py-2 border-r border-surface-500/30 bg-transparent flex flex-col">
+    <div
+      className="h-full border-r border-surface-500/30 bg-transparent flex flex-col relative"
+      style={{ width }}
+    >
+      {/* Resize handle */}
+      <div
+        onMouseDown={startResize}
+        className="absolute z-11 top-0 right-0 h-full w-2 cursor-e-resize 
+                   hover:bg-white/5 active:bg-white/10 transition-colors"
+      />
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-linear-to-b from-surface-700 
-                      to-transparent/0 backdrop-blur-sm px-4 pb-1 pt-2 mb-2">
+      <div className="sticky top-0 z-10 bg-surface-700 px-4 pb-1 pt-2 mb-2">
         <div className="flex items-center gap-2 w-full">
           <button className="tracking-wider flex-1 text-left font-medium text-[0.9rem] 
                              text-surface-200 truncate hover:text-accent-500">
@@ -61,15 +99,12 @@ const Sidebar: React.FC = () => {
       </div>
 
       {/* Collections */}
-      <div className="space-y-3 px-3 flex-1 overflow-auto bg-transparent scroll-thin">
+      <div className="space-y-3 px-3 flex-1 overflow-auto scroll-thin">
         {collections.map((collection: Collection) => {
           const isOpen = openMap[collection.name];
 
           return (
-            <motion.div 
-              key={collection.name} 
-              layout  // ← Magic: auto-animates layout shifts
-            >
+            <motion.div key={collection.name}>
               {/* Button */}
               <button
                 type="button"
@@ -79,24 +114,18 @@ const Sidebar: React.FC = () => {
                            focus:outline-none"
               >
                 {isOpen ? (
-                  <span className="h-4 w-4 text-surface-200">
-                    <FolderOpenIcon />
-                  </span>
-                  
+                  <span className="h-4 w-4 text-surface-200"><FolderOpenIcon /></span>
                 ) : (
-                  <span className="h-4 w-4 text-surface-200/80">
-                    <FolderIcon />
-                  </span>
+                  <span className="h-4 w-4 text-surface-200/80"><FolderIcon /></span>
                 )}
                 <span className="truncate text-[0.8rem]">{collection.name}</span>
               </button>
 
-              {/* Animated Expand/Collapse */}
+              {/* Animated list */}
               <AnimatePresence initial={false}>
                 {isOpen && collection.endpoints.length > 0 && (
                   <motion.div
                     key="content"
-                    layout
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
@@ -114,7 +143,6 @@ const Sidebar: React.FC = () => {
           );
         })}
       </div>
-
     </div>
   );
 };
