@@ -53,7 +53,7 @@ async function syncEndpointToTab(
   const newTab = buildTabDocFromEndpoint(endpoint);
 
   saveTabDoc(newTab);
-  await appendKeyToOrder(newTab.key);
+  await appendKeyToOrder(newTab.key, endpoint.name);
 
   // ensure endpoint still same after async work
   const latest = useViewingDocStore.getState().endpoint;

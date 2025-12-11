@@ -26,3 +26,11 @@ export interface TabDoc {
 }
 
 export type KeyOrderMap = Record<string, number>;
+
+export interface TabOrderItem {
+  tabKey: string;
+  order: number;    // 0-based index
+  name: string;     // label for TabBar
+}
+
+export type TabOrderList = TabOrderItem[];

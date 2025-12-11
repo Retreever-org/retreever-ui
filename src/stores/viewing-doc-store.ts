@@ -1,14 +1,18 @@
 import { create } from "zustand";
 import type { Endpoint } from "../types/response.types";
-import type { TabDoc, KeyOrderMap } from "../types/editor.types";
+import type { TabDoc, TabOrderList } from "../types/editor.types";
+
+/* ---------- Store shape ---------- */
 
 interface ViewingDocState {
   endpoint: Endpoint | null;
   tabDoc: TabDoc | null;
-  keyOrderMap: KeyOrderMap;
+
+  // light snapshot for TabBar
+  tabOrderList: TabOrderList;
   currentTabOrder: number | null;
 
-  setKeyOrderMap: (map: KeyOrderMap) => void;
+  setTabOrderList: (list: TabOrderList) => void;
   setEndpoint: (ep: Endpoint | null) => void;
   setTabDoc: (tab: TabDoc | null) => void;
   setTabOrder: (order: number | null) => void;
@@ -20,24 +24,31 @@ interface ViewingDocState {
   clear: () => void;
 }
 
-// THIS is the store object
+/* ---------- Store object ---------- */
+
 export const viewingDocStore = create<ViewingDocState>((set, get) => ({
   endpoint: null,
   tabDoc: null,
-  keyOrderMap: {},
+
+  tabOrderList: [],
   currentTabOrder: null,
-  // ...rest exactly as you already have...
-  setKeyOrderMap: (map) => set({ keyOrderMap: map }),
+
+  setTabOrderList: (list) => set({ tabOrderList: list }),
+
   setEndpoint: (endpoint) => set({ endpoint }),
+
   setTabDoc: (tab) =>
     set({
       tabDoc: tab,
       currentTabOrder:
-        tab && (get().keyOrderMap[tab.key] ?? null) !== null
-          ? get().keyOrderMap[tab.key]
+        tab
+          ? get().tabOrderList.find((t) => t.tabKey === tab.key)?.order ??
+            get().currentTabOrder
           : get().currentTabOrder,
     }),
+
   setTabOrder: (order) => set({ currentTabOrder: order }),
+
   updateTabDoc: (patch) => {
     const current = get().tabDoc;
     if (!current) return;
@@ -49,6 +60,7 @@ export const viewingDocStore = create<ViewingDocState>((set, get) => ({
       },
     });
   },
+
   updateUiRequest: (patch) => {
     const current = get().tabDoc;
     if (!current) return;
@@ -63,6 +75,7 @@ export const viewingDocStore = create<ViewingDocState>((set, get) => ({
       },
     });
   },
+
   setLastResponse: (resp) => {
     const current = get().tabDoc;
     if (!current) return;
@@ -74,21 +87,28 @@ export const viewingDocStore = create<ViewingDocState>((set, get) => ({
       },
     });
   },
+
   clear: () =>
     set({
       endpoint: null,
       tabDoc: null,
-      keyOrderMap: {},
+      tabOrderList: [],
       currentTabOrder: null,
     }),
 }));
 
-// Hook used in components (what you already had)
+/* ---------- Hook + selectors ---------- */
+
 export const useViewingDocStore = viewingDocStore;
 
-// selectors
-export const useViewingEndpoint = () => useViewingDocStore((s) => s.endpoint);
-export const useViewingTabDoc = () => useViewingDocStore((s) => s.tabDoc);
-export const useKeyOrderMap = () => useViewingDocStore((s) => s.keyOrderMap);
+export const useViewingEndpoint = () =>
+  useViewingDocStore((s) => s.endpoint);
+
+export const useViewingTabDoc = () =>
+  useViewingDocStore((s) => s.tabDoc);
+
+export const useTabOrderList = () =>
+  useViewingDocStore((s) => s.tabOrderList);
+
 export const useCurrentTabOrder = () =>
   useViewingDocStore((s) => s.currentTabOrder);
