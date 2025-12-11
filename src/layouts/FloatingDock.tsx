@@ -1,7 +1,6 @@
 import { Rnd } from "react-rnd";
 import { useDockStore } from "../stores/dock-store";
 import { useEffect, useState } from "react";
-import { SidePanelIcon, XMarkIcon } from "../svgs/svgs";
 import { useUtilityViewState } from "../stores/utility-view-store";
 import { useRightPanelStore } from "../stores/right-panel-store";
 import UtilityHeader from "../components/utility/UtilityHeader";
