@@ -1,4 +1,4 @@
-import type { RetreeverDoc, Endpoint, HttpMethod } from "../types/response.types";
+import type { RetreeverDoc, Endpoint } from "../types/response.types";
 
 /**
  * Finds an endpoint inside a RetreeverDoc using method + path.
@@ -10,7 +10,7 @@ import type { RetreeverDoc, Endpoint, HttpMethod } from "../types/response.types
  */
 export function findEndpoint(
   doc: RetreeverDoc | null,
-  method: HttpMethod,
+  method: string,
   path: string
 ): Endpoint | null {
   if (!doc) return null;

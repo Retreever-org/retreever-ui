@@ -25,8 +25,6 @@ export interface TabDoc {
   updatedAt: number;
 }
 
-export type KeyOrderMap = Record<string, number>;
-
 export interface TabOrderItem {
   tabKey: string;
   order: number;    // 0-based index

@@ -11,13 +11,18 @@ import { useEnvInitializer } from "./hooks/useEnvInitializer";
 import "./services/auto-refresh-service"; // auto triggers zustand subscriber
 import { initLayoutPersistence } from "./services/layout-persistence-service";
 import "./services/viewing-doc-sync-service"; // auto triggers zustand subscriber
+import "./services/tab-order-sync-service"; // auto triggers zustand subscriber
 import { useEffect } from "react";
+import { useTabOrderInitializer } from "./hooks/useTabOrderInitializer";
+import { useViewingDocInitializer } from "./hooks/useViewingDocInitializer";
 
 function App() {
   const isInitializing = useIsInitializing();
   useAppInitializer();
   useApiHealthMonitor();
   useEnvInitializer();
+  useTabOrderInitializer();
+  useViewingDocInitializer();
 
   useEffect(() => {
     initLayoutPersistence();

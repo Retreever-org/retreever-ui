@@ -1,10 +1,29 @@
+import { useDocStore } from "../stores/doc-store";
 import type { TabDoc } from "../types/editor.types";
 import type { Endpoint } from "../types/response.types";
+import { findEndpoint } from "./doc-search";
 
 export const tabKeyForEndpoint = (method: string, path: string) =>
-  `TAB::${method.toUpperCase()}::${encodeURIComponent(path)}`;
+  `${method.toUpperCase()}:${path}`;
 
-export function buildTabDocFromEndpoint(ep: Endpoint, baseUriPrefix?: string): TabDoc {
+export function tabKeyToEndpoint(
+  key: string
+): Endpoint | null {
+  const docStore = useDocStore()
+  const [methodPart, path] = key.split(":", 2);
+  if (!methodPart || !path) return null;
+
+  const method = methodPart.toUpperCase();
+
+  const endpoint = findEndpoint(docStore.doc, method, path);
+
+  return endpoint;
+}
+
+export function buildTabDocFromEndpoint(
+  ep: Endpoint,
+  baseUriPrefix?: string
+): TabDoc {
   const path = ep.path;
   const method = ep.method;
   const key = tabKeyForEndpoint(method, path);
@@ -14,9 +33,10 @@ export function buildTabDocFromEndpoint(ep: Endpoint, baseUriPrefix?: string): T
   let body = "";
   if (ep.request?.example_model) {
     try {
-      body = typeof ep.request.example_model === "string"
-        ? ep.request.example_model
-        : JSON.stringify(ep.request.example_model, null, 2);
+      body =
+        typeof ep.request.example_model === "string"
+          ? ep.request.example_model
+          : JSON.stringify(ep.request.example_model, null, 2);
     } catch {
       body = String(ep.request.example_model);
     }
@@ -28,8 +48,11 @@ export function buildTabDocFromEndpoint(ep: Endpoint, baseUriPrefix?: string): T
     path,
     uiRequest: {
       url,
-      headers: (ep.headers || []).map(h => ({ k: h.name, v: "" })),
-      queryParams: (ep.query_params || []).map(q => ({ k: q.name, v: String(q.default_value ?? "") })),
+      headers: (ep.headers || []).map((h) => ({ k: h.name, v: "" })),
+      queryParams: (ep.query_params || []).map((q) => ({
+        k: q.name,
+        v: String(q.default_value ?? ""),
+      })),
       body,
       consumes: ep.consumes || [],
     },
@@ -38,4 +61,3 @@ export function buildTabDocFromEndpoint(ep: Endpoint, baseUriPrefix?: string): T
     updatedAt: Date.now(),
   };
 }
-

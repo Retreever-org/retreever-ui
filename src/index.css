@@ -28,6 +28,16 @@
   border-radius: 10px; /* sharp edge */
 }
 
+.scroll-transparent::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0);
+  border-radius: 0px; 
+}
+
+.scroll-transparent::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
 
 /* Floating Dock animation */
 
