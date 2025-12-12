@@ -32,3 +32,9 @@ export interface TabOrderItem {
 }
 
 export type TabOrderList = TabOrderItem[];
+
+export type EditingType = "params" | "headers" | "body";
+
+export type BodyType = "none" | "form-data" | "x-www-form-urlencoded" | "binary" | "raw";
+
+export type RawBodyType = "text" | "JSON" | "XML" | "HTML" | "JavaScript";

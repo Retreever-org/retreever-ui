@@ -2,6 +2,7 @@ import React from "react";
 import { useViewingDocStore } from "../stores/viewing-doc-store";
 import { SecuredIcon, UnSecuredIcon } from "../svgs/svgs";
 import Request from "../components/canvas/Request";
+import RequestInputController from "./RequestInputController";
 
 const TestingPanel: React.FC = () => {
   const { endpoint, tabDoc } = useViewingDocStore();
@@ -16,7 +17,7 @@ const TestingPanel: React.FC = () => {
     <section className="flex flex-col gap-4 p-4 bg-transparent text-white rounded-md">
       {/* Title row */}
       <div className="flex items-center justify-between">
-        <div className="w-full flex items-center gap-2 pb-3 px-4">
+        <div className="w-full flex items-center gap-2 pb-3 px-1">
           {isSecured ? (
             <span
               className="w-4 h-4 inline-flex items-center text-xs font-medium text-emerald-300/60"
@@ -44,34 +45,7 @@ const TestingPanel: React.FC = () => {
       <Request />
 
       {/* View switches */}
-      <div className="border-b  border-surface-500/50">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => {}}
-            className="px-3 py-1.5 text-xs font-medium rounded-t-md text-slate-100"
-          >
-            Params
-          </button>
-          <button
-            type="button"
-            onClick={() => {}}
-            className="px-3 py-1.5 text-xs font-medium rounded-t-md text-slate-300"
-          >
-            Headers
-          </button>
-          {endpoint.method.toLocaleUpperCase() !== "GET" &&
-            endpoint.method.toLocaleUpperCase() !== "DELETE" && (
-              <button
-                type="button"
-                onClick={() => {}}
-                className="px-3 py-1.5 text-xs font-medium rounded-t-md text-slate-300"
-              >
-                Body
-              </button>
-            )}
-        </div>
-      </div>
+      <RequestInputController />
     </section>
   );
 };
