@@ -1,13 +1,10 @@
 import React from "react";
 import { useViewingDocStore } from "../stores/viewing-doc-store";
-import { getMethodColor } from "../components/canvas/EndpointTabUtil";
 import { SecuredIcon, UnSecuredIcon } from "../svgs/svgs";
-import { getBaseURL } from "../api/axios/axios-instance";
 import Request from "../components/canvas/Request";
 
 const TestingPanel: React.FC = () => {
   const { endpoint, tabDoc } = useViewingDocStore();
-  const baseUrl = getBaseURL();
 
   if (!endpoint || !tabDoc) {
     return <div className="p-4 text-sm text-red-500">Invalid Endpoint</div>;
