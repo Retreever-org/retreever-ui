@@ -1,9 +1,13 @@
-// hooks/useTabOrderInitializer.ts
 import { useEffect } from "react";
-import { tabOrderStore } from "../stores/tab-order-store";
-import { getLastActiveTabKey, getTabOrderList } from "../storage/tab-order-storage";
+import { useTabOrderStore } from "../stores/tab-order-store";
+import {
+  getLastActiveTabKey,
+  getTabOrderList,
+} from "../storage/tab-order-storage";
 
 export const useTabOrderInitializer = () => {
+  const { setTabOrderList, setActiveTab } = useTabOrderStore();
+
   useEffect(() => {
     let cancelled = false;
 
@@ -14,7 +18,11 @@ export const useTabOrderInitializer = () => {
 
         if (cancelled) return;
 
-        tabOrderStore.setState({ orderList: list, activeTab: lastActive });
+        const lastActiveItem = list.find((o) => o.tabKey === lastActive);
+        setTabOrderList(list);
+        if (lastActiveItem) {
+          setActiveTab(lastActive, lastActiveItem.name);
+        }
       } catch {
         // ignore; start with empty list on failure
       }

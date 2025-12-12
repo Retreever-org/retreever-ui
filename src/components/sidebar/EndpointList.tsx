@@ -1,30 +1,23 @@
-import React from "react"
-import type { EndpointSummary } from "../../types/filtered.types"
-import { useDocStore } from "../../stores/doc-store"
-import { useViewingDocStore } from "../../stores/viewing-doc-store"
-import { findEndpoint } from "../../services/doc-search"
+import React from "react";
+import type { EndpointSummary } from "../../types/filtered.types";
+import { useTabOrderStore } from "../../stores/tab-order-store";
+import { tabKeyForEndpoint } from "../../services/tab-factory";
 
 interface EndpointListProps {
-  collectionName: string
-  endpoints: EndpointSummary[]
+  collectionName: string;
+  endpoints: EndpointSummary[];
 }
 
 export const EndpointList: React.FC<EndpointListProps> = ({
   collectionName,
   endpoints,
 }) => {
-  const doc = useDocStore((s) => s.doc)
-  const setViewingEndpoint = useViewingDocStore((s) => s.setEndpoint)
+  const { setActiveTab } = useTabOrderStore();
 
-  const handleClick = (method: string, path: string) => {
-    if (!doc) return
-
-    const ep = findEndpoint(doc, method as any, path)
-    if (ep) {
-      setViewingEndpoint(ep)
-      useViewingDocStore.getState().setEndpoint(ep);
-    }
-  }
+  const handleClick = (name: string, method: string, path: string) => {
+      const key = tabKeyForEndpoint(method, path);
+      setActiveTab(key, name);
+  };
 
   return (
     <div className="mt-1 space-y-2">
@@ -40,13 +33,13 @@ export const EndpointList: React.FC<EndpointListProps> = ({
             ? "text-rose-300"
             : endpoint.method === "PATCH"
             ? "text-violet-400"
-            : "text-surface-300"
+            : "text-surface-300";
 
         return (
           <div
             key={`${collectionName}-${endpoint.method}-${endpoint.path}`}
             className="flex items-center rounded-md px-6 py-0.5 text-[0.8rem] text-surface-200 hover:bg-white/5 cursor-pointer"
-            onClick={() => handleClick(endpoint.method, endpoint.path)}
+            onClick={() => handleClick(endpoint.name, endpoint.method, endpoint.path)}
           >
             {/* Fixed-width method column */}
             <span
@@ -60,8 +53,8 @@ export const EndpointList: React.FC<EndpointListProps> = ({
               {endpoint.name}
             </span>
           </div>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};

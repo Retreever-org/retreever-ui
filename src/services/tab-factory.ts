@@ -1,21 +1,20 @@
-import { useDocStore } from "../stores/doc-store";
 import type { TabDoc } from "../types/editor.types";
-import type { Endpoint } from "../types/response.types";
+import type { Endpoint, RetreeverDoc } from "../types/response.types";
 import { findEndpoint } from "./doc-search";
 
 export const tabKeyForEndpoint = (method: string, path: string) =>
   `${method.toUpperCase()}:${path}`;
 
 export function tabKeyToEndpoint(
-  key: string
+  key: string,
+  doc: RetreeverDoc | null
 ): Endpoint | null {
-  const docStore = useDocStore()
   const [methodPart, path] = key.split(":", 2);
   if (!methodPart || !path) return null;
 
   const method = methodPart.toUpperCase();
 
-  const endpoint = findEndpoint(docStore.doc, method, path);
+  const endpoint = findEndpoint(doc, method, path);
 
   return endpoint;
 }

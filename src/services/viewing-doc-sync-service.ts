@@ -1,5 +1,4 @@
 import { useViewingDocStore } from "../stores/viewing-doc-store";
-import { tabOrderStore } from "../stores/tab-order-store";
 import { buildTabDocFromEndpoint, tabKeyForEndpoint } from "./tab-factory";
 import type { Endpoint } from "../types/response.types";
 import type { TabDoc } from "../types/editor.types";
@@ -34,44 +33,19 @@ async function syncEndpointToTab(
 
   const key = tabKeyForEndpoint(endpoint.method, endpoint.path);
 
-  // endpoint effectively unchanged
-  if (lastEndpointKey === key) return;
-  lastEndpointKey = key;
-
-  // already viewing correct tab
+  // already viewing tab --> return
   if (currentTab && currentTab.key === key) return;
 
+  // ----------- continuing when endpoint has changed -----------
   // load or create TabDoc
   let tab = await getTabDoc(key);
   const isNew = !tab;
 
-  if (!tab) {
+  if (isNew) {
     tab = buildTabDocFromEndpoint(endpoint);
     saveTabDoc(tab);
   }
 
-  // ensure endpoint still same after async work
-  const latest = useViewingDocStore.getState().endpoint;
-  if (!latest || tabKeyForEndpoint(latest.method, latest.path) !== key) return;
-
   // update viewing doc
   useViewingDocStore.setState({ tabDoc: tab });
-
-  // update tab-order store
-  const { orderList, addNewTab, setActiveTab } = tabOrderStore.getState();
-
-  if (isNew && !orderList.some((t) => t.tabKey === key)) {
-    const nextOrder =
-      orderList.length > 0
-        ? Math.max(...orderList.map((t) => t.order)) + 1
-        : 0;
-
-    addNewTab({
-      tabKey: key,
-      order: nextOrder,
-      name: endpoint.name,
-    });
-  }
-
-  setActiveTab(key);
 }

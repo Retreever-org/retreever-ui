@@ -19,7 +19,7 @@ interface DocState {
   clear: () => void;
 }
 
-export const useDocStore = create<DocState>()((set) => ({
+export const docStore = create<DocState>()((set) => ({
   // Initial State
 
   doc: null,
@@ -46,6 +46,8 @@ export const useDocStore = create<DocState>()((set) => ({
       isLoadingDoc: false,
     }),
 }));
+
+export const useDocStore = docStore;
 
 // Getter for uptime (from doc)
 export const useDocUptime = () => {
