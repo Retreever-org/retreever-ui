@@ -3,9 +3,11 @@ import { useViewingDocStore } from "../stores/viewing-doc-store";
 import { SecuredIcon, UnSecuredIcon } from "../svgs/svgs";
 import Request from "../components/canvas/Request";
 import RequestInputController from "./RequestInputController";
+import RequestKeyValueEditor from "../components/canvas/RequestKeyValueEditor";
 
 const TestingPanel: React.FC = () => {
   const { endpoint, tabDoc } = useViewingDocStore();
+  const { editing } = tabDoc?.uiRequest || {};
 
   if (!endpoint || !tabDoc) {
     return <div className="p-4 text-sm text-red-500">Invalid Endpoint</div>;
@@ -46,6 +48,13 @@ const TestingPanel: React.FC = () => {
 
       {/* View switches */}
       <RequestInputController />
+      {
+        (editing === "headers" || editing === "params") && (
+          <div className="flex-1 overflow-auto">
+            <RequestKeyValueEditor />
+          </div>
+        )
+      }
     </section>
   );
 };

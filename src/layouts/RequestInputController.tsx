@@ -19,12 +19,16 @@ const EDITING_OPTIONS: { key: EditingType; label: string }[] = [
 ];
 
 const RequestInputController: React.FC = () => {
-  const { tabDoc, updateUiRequest } = useViewingDocStore();
+  const { endpoint, tabDoc, updateUiRequest } = useViewingDocStore();
 
   if (!tabDoc) return null;
 
   const { editing, bodyType, rawType, consumes } = tabDoc.uiRequest;
   const hasConsumes = consumes && consumes.length > 0;
+  const noBodyMethods = ["GET", "DELETE"];
+  const noBody = noBodyMethods.includes(
+    endpoint?.method.toLocaleUpperCase() || ""
+  );
 
   return (
     <div
@@ -38,6 +42,9 @@ const RequestInputController: React.FC = () => {
       <div className="flex gap-3">
         {EDITING_OPTIONS.map((opt) => {
           const active = opt.key === editing;
+          if (noBody && opt.key === "body") {
+            return null;
+          }
           return (
             <SwitchBtn
               key={opt.key}
@@ -50,20 +57,18 @@ const RequestInputController: React.FC = () => {
       </div>
 
       {/* Body / Consumes */}
-      {hasConsumes && <ConsumesOption />}
+      {!noBody && hasConsumes && <ConsumesOption />}
 
-      {!hasConsumes && editing === "body" && (
-        <div className="flex items-center gap-4 mr-3">
-          <BodySelector
-            value={bodyType}
-            onChange={(v) =>
-              updateUiRequest({
-                bodyType: v,
-                rawType: v === "raw" ? rawType ?? "JSON" : undefined,
-              })
-            }
-          />
-        </div>
+      {!noBody && !hasConsumes && editing === "body" && (
+        <BodySelector
+          value={bodyType}
+          onChange={(v) =>
+            updateUiRequest({
+              bodyType: v,
+              rawType: v === "raw" ? rawType ?? "JSON" : undefined,
+            })
+          }
+        />
       )}
     </div>
   );

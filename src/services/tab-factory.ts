@@ -1,7 +1,7 @@
-import type { TabDoc } from "../types/editor.types";
+import type { TabDoc, RequestKeyValueEntry } from "../types/editor.types";
 import type { Endpoint, RetreeverDoc } from "../types/response.types";
 import { findEndpoint } from "./doc-search";
-import { resolveContentType } from "../services/contentTypeResolver"; // ✅ ADD
+import { resolveContentType } from "../services/contentTypeResolver";
 
 export const tabKeyForEndpoint = (method: string, path: string) =>
   `${method.toUpperCase()}:${path}`;
@@ -42,9 +42,30 @@ export function buildTabDocFromEndpoint(
   }
 
   const consumes = ep.consumes || [];
-  const resolved = consumes.length > 0
-    ? resolveContentType(consumes[0])
-    : { bodyType: "none" as const, rawType: undefined };
+  const resolved =
+    consumes.length > 0
+      ? resolveContentType(consumes[0])
+      : { bodyType: "none" as const, rawType: undefined };
+
+  // server-defined headers
+  const headers: RequestKeyValueEntry[] = (ep.headers || []).map((h) => ({
+    key: h.name,
+    value: "",
+    editable: false, // server-defined key
+    local: false,
+    ignore: false,
+  }));
+
+  // server-defined query params
+  const queryParams: RequestKeyValueEntry[] = (ep.query_params || []).map(
+    (q) => ({
+      key: q.name,
+      value: q.default_value != null ? String(q.default_value) : "",
+      editable: false, // server-defined key
+      local: false,
+      ignore: false,
+    })
+  );
 
   return {
     key,
@@ -52,11 +73,8 @@ export function buildTabDocFromEndpoint(
     path,
     uiRequest: {
       url,
-      headers: (ep.headers || []).map((h) => ({ k: h.name, v: "" })),
-      queryParams: (ep.query_params || []).map((q) => ({
-        k: q.name,
-        v: String(q.default_value ?? ""),
-      })),
+      headers,
+      queryParams,
       body,
       consumes,
 

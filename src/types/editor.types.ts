@@ -7,8 +7,8 @@ export interface TabDoc {
 
   uiRequest: {
     url: string;
-    headers: Array<{ k: string; v: string }>;
-    queryParams: Array<{ k: string; v: string }>;
+    headers: RequestKeyValueEntry[];
+    queryParams: RequestKeyValueEntry[];
     body: string;
     consumes: string[];
 
@@ -33,6 +33,15 @@ export interface TabOrderItem {
   tabKey: string;
   order: number; // 0-based index
   name: string; // label for TabBar
+}
+
+export interface RequestKeyValueEntry {
+  key: string;
+  value: string;
+
+  editable: boolean; // can the key be edited?
+  local: boolean; // was this added by user?
+  ignore: boolean; // exclude from request send
 }
 
 export type TabOrderList = TabOrderItem[];
