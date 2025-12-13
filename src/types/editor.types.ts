@@ -56,7 +56,7 @@ export interface FormEntry {
   key: string;
 
   type: InputType;
-  value: string; // text OR fileId
+  value: string; // text OR fileId OR fileIDs JSON string array "[]"
 
   editable: boolean;
   local: boolean;

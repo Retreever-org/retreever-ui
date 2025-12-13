@@ -4,6 +4,7 @@ import type { FormEntry } from "../../types/editor.types";
 import { CheckIcon2, DeleteIcon } from "../../svgs/svgs";
 import EnvAwareInput from "./EnvAwareInput";
 import DropDown from "../form/DropDown";
+import FileUploadInput from "../form/FileUploadInput";
 
 /* ---------------- helpers ---------------- */
 
@@ -143,15 +144,15 @@ const FormEditor: React.FC = () => {
                   <DropDown
                     value={row.type}
                     onChange={(type) => {
-                        console.log("Selected Type: ", type);
-                        updateRow(index, { type, value: "" })
+                      console.log("Selected Type: ", type);
+                      updateRow(index, { type, value: "" });
                     }}
                     disabled={isEmptyRow(row)}
                   />
                 </td>
 
                 {/* VALUE */}
-                <td className="px-4 py-2 border border-r-0 border-surface-500/40">
+                <td className="px-4 border border-r-0 border-surface-500/40">
                   {row.type === "text" ? (
                     <EnvAwareInput
                       value={row.value}
@@ -159,9 +160,10 @@ const FormEditor: React.FC = () => {
                       onChange={(val) => updateRow(index, { value: val })}
                     />
                   ) : (
-                    <div className="text-surface-400 italic">
-                      File selector (coming soon)
-                    </div>
+                    <FileUploadInput
+                      value={row.value}
+                      onChange={(val) => updateRow(index, { value: val })}
+                    />
                   )}
                 </td>
 

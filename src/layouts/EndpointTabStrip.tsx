@@ -5,16 +5,30 @@ import { useTabOrderStore } from "../stores/tab-order-store";
 import { XMarkIcon } from "../svgs/svgs";
 import { tabKeyToEndpoint } from "../services/tab-factory";
 import { useDocStore } from "../stores/doc-store";
-import { clearAllTabDocs, clearOtherTabs, removeTabDoc } from "../storage/tab-doc-storage";
+import {
+  clearAllTabDocs,
+  clearOtherTabs,
+  getAllTabDoc,
+  getTabDoc,
+  removeTabDoc,
+} from "../storage/tab-doc-storage";
 import {
   extractMethod,
   getMethodColor,
   sortTabs,
   calculateMenuPosition,
 } from "../components/canvas/EndpointTabUtil";
+import { deleteAllFiles, deleteFile } from "../storage/file-storage";
 
 export const EndpointTabStrip: React.FC = () => {
-  const { activeTab, orderList, closeTab, setActiveTab, closeOthers, closeAll } = useTabOrderStore();
+  const {
+    activeTab,
+    orderList,
+    closeTab,
+    setActiveTab,
+    closeOthers,
+    closeAll,
+  } = useTabOrderStore();
   const { doc } = useDocStore();
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -40,7 +54,29 @@ export const EndpointTabStrip: React.FC = () => {
     if (endpoint) setActiveTab(tabKey, endpoint.name);
   };
 
-  const handleCloseTab = (tabKey: string) => {
+  const deleteFilesInTabDoc = async (tabKey: string) => {
+    const td = await getTabDoc(tabKey);
+    if (td) {
+      const form = td.uiRequest.body.formData;
+      if (form) {
+        form
+          .filter((f) => f.type === "file")
+          .forEach(async (f) => {
+            try {
+              const fileIds: string[] = f.value ? JSON.parse(f.value) : [];
+              for (const fileId of fileIds) {
+                await deleteFile(fileId);
+              }
+            } catch {
+              // ignore errors
+            }
+          });
+      }
+    }
+  }
+
+  const handleCloseTab = async (tabKey: string) => {
+    deleteFilesInTabDoc(tabKey);
     closeTab(tabKey);
     removeTabDoc(tabKey); // removes from DB directly
   };
@@ -52,14 +88,24 @@ export const EndpointTabStrip: React.FC = () => {
     if (tabKey) handleCloseTab(tabKey);
     closeCTxMenu();
   };
+
   const onCtxCloseOther = (tabKey: string | null) => {
-    if(tabKey) {
+    // delete files in other tabs
+    getAllTabDoc().then((all) => {
+      all.filter((td) => td.key !== tabKey).forEach(async (td) => {
+        await deleteFilesInTabDoc(td.key);
+        removeTabDoc(td.key); // removes from DB directly
+      });
+    })
+    if (tabKey) {
       closeOthers(tabKey);
       clearOtherTabs(tabKey); // removes from DB directly
     }
     closeCTxMenu();
   };
+
   const onCtxCloseAll = () => {
+    deleteAllFiles();
     closeAll();
     clearAllTabDocs();
     closeCTxMenu();

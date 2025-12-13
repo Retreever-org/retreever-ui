@@ -50,7 +50,7 @@ const DropDown: React.FC<Props> = ({ value, onChange, disabled }) => {
         ref={triggerRef}
         type="button"
         onClick={openMenu}
-        className="w-full h-full px-2 flex items-center justify-between text-xs text-surface-200 cursor-pointer"
+        className={`w-full h-full px-2 flex items-center justify-between text-xs text-surface-200 cursor-pointer ${disabled ? "opacity-30" : "opacity-100"}`}
       >
         <span className="capitalize">{value}</span>
         <svg
@@ -67,7 +67,7 @@ const DropDown: React.FC<Props> = ({ value, onChange, disabled }) => {
             strokeWidth={1.6}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-surface-300"
+            className={`text-surface-300`}
           />
         </svg>
       </button>
