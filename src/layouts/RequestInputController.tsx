@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { useCanvasState } from "../stores/canvas-controller-store";
 import { useViewingDocStore } from "../stores/viewing-doc-store";
 import type { BodyType, RawBodyType, EditingType } from "../types/editor.types";
+import ConsumesOption from "../components/canvas/ConsumesOption";
+import RawBodyDropdown from "../components/canvas/RawBodyDropdown";
 
 const BODY_OPTIONS: { key: BodyType; label: string }[] = [
   { key: "none", label: "none" },
@@ -19,6 +21,12 @@ const RAW_OPTIONS: RawBodyType[] = [
   "JavaScript",
 ];
 
+const EDITING_OPTIONS: { key: EditingType; label: string }[] = [
+  { key: "params", label: "Params" },
+  { key: "headers", label: "Headers" },
+  { key: "body", label: "Body" },
+];
+
 const RequestInputController: React.FC = () => {
   const { endpoint } = useViewingDocStore();
 
@@ -30,38 +38,33 @@ const RequestInputController: React.FC = () => {
     console.log(editing, bodyType, rawType);
   }, [editing, bodyType, rawType]);
 
-  const consumesValid = endpoint?.consumes && endpoint.consumes.length > 0 ;
-  const method = endpoint?.method?.toUpperCase?.() ?? "";
+  const consumes = endpoint?.consumes && endpoint.consumes.length > 0;
 
   return (
-    <div className={`flex ${consumesValid ? "flex-row items-center justify-start gap-4" : "flex-col justify-center items-start "} text-xs w-full`}>
+    <div
+      className={`flex ${
+        consumes
+          ? "flex-row items-center justify-start gap-4"
+          : "flex-col justify-center items-start "
+      } text-xs w-full`}
+    >
       <div className="flex gap-3">
-        <SwitchBtn
-          name="Params"
-          type="params"
-          active={editing === "params"}
-          onClick={() => setEditing("params")}
-        />
-        <SwitchBtn
-          name="Headers"
-          type="headers"
-          active={editing === "headers"}
-          onClick={() => setEditing("headers")}
-        />
-        {method !== "GET" && method !== "DELETE" && (
-          <SwitchBtn
-            name="Body"
-            type="body"
-            active={editing === "body"}
-            onClick={() => setEditing("body")}
-          />
-        )}
+        {EDITING_OPTIONS.map((opt) => {
+          const active = opt.key === editing;
+          return (
+            <SwitchBtn
+              key={opt.key}
+              name={opt.label}
+              type={opt.key}
+              active={active}
+              onClick={() => setEditing(opt.key)}
+            />
+          );
+        })}
       </div>
 
-      {consumesValid ? (
-        <div className="text-surface-400 mr-4">
-          {"[ " + endpoint.consumes.join(", ") + " ]"}
-        </div>
+      {consumes ? (
+        <ConsumesOption />
       ) : (
         <div className="flex items-center gap-4 mr-3">
           <BodySelector
@@ -155,113 +158,11 @@ const BodySelector: React.FC<BodySelectorProps> = ({
 
       {value === "raw" && (
         <div className="flex items-center gap-2 relative">
-          <RawDropdown
+          <RawBodyDropdown
             value={rawValue}
             options={RAW_OPTIONS}
             onChange={(r) => onRawChange(r)}
           />
-        </div>
-      )}
-    </div>
-  );
-};
-
-/* --------------------------
-   RawDropdown - custom select replacement
-   - Uses the requested classes for the dropdown container:
-     "border border-surface-500/50" and "bg-black/20"
-   - Options are rendered as buttons that call onChange when clicked
-   -------------------------- */
-interface RawDropdownProps {
-  value: RawBodyType;
-  options: RawBodyType[];
-  onChange: (r: RawBodyType) => void;
-}
-
-const RawDropdown: React.FC<RawDropdownProps> = ({
-  value,
-  options,
-  onChange,
-}) => {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const onDocClick = (e: MouseEvent) => {
-      if (!rootRef.current) return;
-      if (!rootRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("click", onDocClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("click", onDocClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, []);
-
-  const toggle = (next?: boolean) =>
-    setOpen((s) => (typeof next === "boolean" ? next : !s));
-  const onSelect = (r: RawBodyType) => {
-    onChange(r);
-    setOpen(false);
-  };
-
-  return (
-    <div ref={rootRef} className="relative inline-block text-xs">
-      <button
-        type="button"
-        onClick={() => toggle()}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        className="h-8 px-3 rounded-md flex items-center gap-2 text-surface-100 bg-surface-700 border border-surface-600 outline-none"
-      >
-        <span className="whitespace-nowrap">{value}</span>
-        <svg
-          className={`w-3 h-3 transition-transform duration-150 ${
-            open ? "rotate-180" : ""
-          }`}
-          viewBox="0 0 20 20"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M6 8l4 4 4-4"
-            stroke="currentColor"
-            strokeWidth={1.6}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-
-      {/* Dropdown panel */}
-      {open && (
-        <div
-          role="listbox"
-          aria-label="Raw body type"
-          className="absolute right-0 mt-2 min-w-[120px] z-50 rounded-md shadow-md border border-surface-500/50 bg-black/20 p-1"
-        >
-          <div className="flex flex-col gap-1">
-            {options.map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                onClick={() => onSelect(opt)}
-                className={`w-full text-left px-3 py-2 text-xs rounded-md transition-colors duration-100 ${
-                  opt === value
-                    ? "text-surface-100 bg-surface-800"
-                    : "text-surface-300 hover:text-surface-100 hover:bg-surface-800/40"
-                }`}
-                aria-checked={opt === value}
-                role="option"
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
         </div>
       )}
     </div>
