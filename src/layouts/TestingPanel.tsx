@@ -4,6 +4,7 @@ import { SecuredIcon, UnSecuredIcon } from "../svgs/svgs";
 import Request from "../components/canvas/Request";
 import RequestInputController from "./RequestInputController";
 import RequestKeyValueEditor from "../components/canvas/RequestKeyValueEditor";
+import FormEditor from "../components/canvas/FormEditor";
 
 const TestingPanel: React.FC = () => {
   const { endpoint, tabDoc } = useViewingDocStore();
@@ -47,11 +48,12 @@ const TestingPanel: React.FC = () => {
 
       {/* View switches */}
       <RequestInputController />
-
+      
       {/* Key-Value Editor - renders only for headers, params, and form-urlencoded body */}
-      <div className="flex-1 overflow-auto">
-        <RequestKeyValueEditor />
-      </div>
+      <RequestKeyValueEditor />
+
+      {/* Form Editor - renders only for body of type form-data */}
+      <FormEditor />
     </section>
   );
 };
