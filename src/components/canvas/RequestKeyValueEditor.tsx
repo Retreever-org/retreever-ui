@@ -2,6 +2,7 @@ import React from "react";
 import { useViewingDocStore } from "../../stores/viewing-doc-store";
 import type { RequestKeyValueEntry } from "../../types/editor.types";
 import { CheckIcon2, DeleteIcon } from "../../svgs/svgs";
+import EnvAwareInput from "./EnvAwareInput";
 
 /* --------------------------
    Helpers
@@ -36,7 +37,12 @@ const RequestKeyValueEditor: React.FC = () => {
   if (!tabDoc) return null;
 
   const { editing, bodyType, body } = tabDoc.uiRequest;
-  if (editing !== "headers" && editing !== "params" && tabDoc.uiRequest.bodyType !== "x-www-form-urlencoded") return null;
+  if (
+    editing !== "headers" &&
+    editing !== "params" &&
+    tabDoc.uiRequest.bodyType !== "x-www-form-urlencoded"
+  )
+    return null;
 
   let sourceKey: "headers" | "queryParams" | "body.urlEncoded" | null = null;
 
@@ -162,15 +168,11 @@ const RequestKeyValueEditor: React.FC = () => {
                 </td>
 
                 {/* VALUE */}
-                <td className="px-4 py-2 border border-r-0 border-surface-500/40">
-                  <input
-                    type="text"
+                <td className="px-4 py-2 border border-r-0 border-surface-500/40 relative">
+                  <EnvAwareInput
                     value={row.value}
                     placeholder="value"
-                    onChange={(e) =>
-                      updateRow(index, { value: e.currentTarget.value })
-                    }
-                    className="w-full bg-transparent outline-none placeholder:text-surface-600"
+                    onChange={(val) => updateRow(index, { value: val })}
                   />
                 </td>
 
