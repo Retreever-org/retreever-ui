@@ -9,12 +9,20 @@ export interface TabDoc {
     url: string;
     headers: RequestKeyValueEntry[];
     queryParams: RequestKeyValueEntry[];
-    body: string;
     consumes: string[];
 
     editing: EditingType;
     bodyType: BodyType;
     rawType: RawBodyType | undefined;
+
+    body: {
+      raw: string | undefined;
+
+      formData: FormEntry[];
+      urlEncoded: RequestKeyValueEntry[];
+
+      binaryFileId?: string; // references IndexedDB blob
+    };
   };
 
   lastResponse?: {
@@ -43,6 +51,19 @@ export interface RequestKeyValueEntry {
   local: boolean; // was this added by user?
   ignore: boolean; // exclude from request send
 }
+
+export interface FormEntry {
+  key: string;
+
+  type: InputType;
+  value: string; // text OR fileId
+
+  editable: boolean;
+  local: boolean;
+  ignore: boolean;
+}
+
+export type InputType = "text" | "file";
 
 export type TabOrderList = TabOrderItem[];
 
