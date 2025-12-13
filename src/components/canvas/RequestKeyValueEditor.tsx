@@ -1,7 +1,7 @@
 import React from "react";
 import { useViewingDocStore } from "../../stores/viewing-doc-store";
 import type { RequestKeyValueEntry } from "../../types/editor.types";
-import { CheckIcon, CheckIcon2, DeleteIcon } from "../../svgs/svgs";
+import { CheckIcon2, DeleteIcon } from "../../svgs/svgs";
 
 /* --------------------------
    Helpers
