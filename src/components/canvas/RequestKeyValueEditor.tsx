@@ -59,7 +59,7 @@ const RequestKeyValueEditor: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-auto">
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full border-collapse text-xs">
         <thead>
           <tr className="text-surface-300 bg-black/10">
             <th className="min-w-6 text-center px-1 py-2 border border-surface-500/40 font-medium">
