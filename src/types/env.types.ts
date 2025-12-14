@@ -27,6 +27,7 @@ export interface EnvResponse {
 // ----------------- Resolved Type ------------------
 
 export interface ResolvedVariable {
+  id: string;
   name: string | null;
   value: string | null;
   editable: boolean;

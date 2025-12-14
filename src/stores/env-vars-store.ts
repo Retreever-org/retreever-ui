@@ -1,74 +1,87 @@
 import { create } from "zustand";
 import type { ResolvedVariable } from "../types/env.types";
 
-export interface EnvVarsState {
-  vars: ResolvedVariable[];
+const uuid = () => crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
 
-  setVars: (vars: ResolvedVariable[]) => void;
-  updateValue: (name: string, value: string) => void;
-  updateKey: (oldName: string, newName: string) => void;
-  addVar: (entry?: Partial<ResolvedVariable>) => void;
-  deleteVar: (name: string | null) => void;
-}
+/* ---------- helpers ---------- */
 
-// empty = both missing/blank
 export const isVariableEmpty = (v: ResolvedVariable): boolean =>
   (!v.name || v.name.trim() === "") && (!v.value || v.value.trim() === "");
 
-// ensure at least one empty variable in the list
-const ensureTrailingEmpty = (vars: ResolvedVariable[]): ResolvedVariable[] => {
+const normalize = (vars: ResolvedVariable[]): ResolvedVariable[] => {
+  const withIds = vars.map((v) => ({
+    ...v,
+    id: v.id == null || v.id === "" ? uuid() : v.id,
+  }));
+
+  return addTrailingRowIfNeeded(withIds);
+};
+
+const addTrailingRowIfNeeded = (vars: ResolvedVariable[]): ResolvedVariable[] => {
   const hasEmpty = vars.some(isVariableEmpty);
   if (hasEmpty) return vars;
 
   return [
     ...vars,
     {
+      id: uuid(),
       name: "",
       value: "",
       editable: true,
       local: true,
     },
   ];
-};
+}
+
+/* ---------- store ---------- */
+
+interface EnvVarsState {
+  vars: ResolvedVariable[];
+
+  setVars: (vars: ResolvedVariable[]) => void;
+  updateValue: (id: string, value: string) => void;
+  updateKey: (id: string, name: string) => void;
+  addVar: (entry?: Partial<ResolvedVariable>) => void;
+  deleteVar: (id: string) => void;
+}
 
 export const useEnvVarsStore = create<EnvVarsState>((set, get) => ({
-  vars: ensureTrailingEmpty([]),
+  vars: normalize([]),
 
   setVars: (vars) => {
-    set({ vars: ensureTrailingEmpty(vars) });
+    set({ vars: normalize(vars) });
   },
 
-  updateValue: (name, value) => {
-    const { vars } = get();
-    const next = vars.map((v) => (v.name === name ? { ...v, value } : v));
-    set({ vars: ensureTrailingEmpty(next) });
+  updateValue: (id, value) => {
+    set((state) => ({
+      vars: state.vars.map((v) => (v.id === id ? { ...v, value } : v)),
+    }));
+    set({ vars: addTrailingRowIfNeeded(get().vars) });
   },
 
-  updateKey: (oldName, newName) => {
-    const { vars } = get();
-    const next = vars.map((v) =>
-      v.name === oldName ? { ...v, name: newName } : v
-    );
-    set({ vars: ensureTrailingEmpty(next) });
+  updateKey: (id, name) => {
+    set((state) => ({
+      vars: state.vars.map((v) => (v.id === id ? { ...v, name } : v)),
+    }));
+    set({ vars: addTrailingRowIfNeeded(get().vars) });
   },
 
   addVar: (entry) => {
-    const { vars } = get();
-    const next: ResolvedVariable[] = [
-      ...vars,
+    const next = [
+      ...get().vars,
       {
+        id: uuid(),
         name: entry?.name ?? "",
         value: entry?.value ?? "",
         editable: entry?.editable ?? true,
-        local: entry?.local ?? true, // ← use entry.local, default true
+        local: entry?.local ?? true,
       },
     ];
-    set({ vars: ensureTrailingEmpty(next) });
+    set({ vars: normalize(next) });
   },
 
-  deleteVar: (name) => {
-    const { vars } = get();
-    const filtered = vars.filter((v) => v.name !== name);
-    set({ vars: ensureTrailingEmpty(filtered) });
+  deleteVar: (id) => {
+    const next = get().vars.filter((v) => v.id !== id);
+    set({ vars: normalize(next) });
   },
 }));

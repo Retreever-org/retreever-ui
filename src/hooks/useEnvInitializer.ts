@@ -5,7 +5,7 @@ import { ping } from "../api/services/ping";
 import { envStorage } from "../storage/env-storage";
 import { envInstanceStorage } from "../storage/env-instance-storage";
 
-import { useEnvVarsStore, isVariableEmpty } from "../stores/env-vars-store";
+import { useEnvVarsStore } from "../stores/env-vars-store";
 import { useEnvInstanceStore } from "../stores/env-instance-store";
 import type { Environment, ResolvedVariable } from "../types/env.types";
 
@@ -17,14 +17,13 @@ export const useEnvInitializer = () => {
     const controller = new AbortController();
 
     const initialize = async () => {
-      // 1. Offline-first: hydrate from DB snapshot as-is
       const localSnapshot = await envStorage.getAll();
+
       if (localSnapshot.length > 0) {
         setVars(localSnapshot);
       }
 
       try {
-        // 2. Try to use cached server instance, if any
         const cached = await envInstanceStorage.get();
 
         if (cached) {
@@ -33,15 +32,12 @@ export const useEnvInitializer = () => {
           const merged = mergeEnvVars(cached.instance, localSnapshot);
           setVars(merged);
 
-          // Background validation against live server
           validateEnvCache(cached, controller.signal);
           return;
         }
 
-        // 3. No cached instance → try fetching fresh from backend
         const env = await getEnvironment();
-        const pong = await ping(); // uptime string
-
+        const pong = await ping();
 
         await envInstanceStorage.save(env, pong.uptime);
         setEnvInstance(env);
@@ -51,8 +47,6 @@ export const useEnvInitializer = () => {
       } catch (err) {
         console.error("Env initializer failed:", err);
 
-        // 4. If network failed but we have no cached instance,
-        //    we already hydrated from DB in step 1.
         const cached = await envInstanceStorage.get();
         if (cached) {
           setEnvInstance(cached.instance);
@@ -63,73 +57,46 @@ export const useEnvInitializer = () => {
     };
 
     initialize();
-
-    return () => {
-      controller.abort();
-    };
+    return () => controller.abort();
   }, [setEnvInstance, setVars]);
 };
 
-// ----------------- MERGING LOGIC -----------------
 const mergeEnvVars = (
   serverEnv: Environment,
   localDB: ResolvedVariable[]
 ): ResolvedVariable[] => {
   const result: ResolvedVariable[] = [];
-  const serverVars = serverEnv.variables;
-
-  // Index local DB by name
   const localByName = new Map<string, ResolvedVariable>();
+
   for (const lv of localDB) {
-    if (!lv.name) continue; // ignore empties/invalid
-    localByName.set(lv.name, lv);
+    if (lv.name) {
+      localByName.set(lv.name, lv);
+    }
   }
 
-  // 1. SERVER VARIABLES (authoritative key set for server-owned vars)
-  for (const sv of serverVars) {
+  for (const sv of serverEnv.variables) {
     const name = sv.name;
     const serverValue = sv.source.value ?? null;
     const localVar = localByName.get(name);
 
     const isStatic = sv.source.value !== null;
 
-    // If static → always take server value.
-    // If dynamic → prefer local override, else server value/null.
-    const finalValue: string | null = isStatic
-      ? serverValue
-      : (localVar?.value ?? serverValue);
-
     result.push({
+      id: "", // ← store will assign
       name,
-      value: finalValue,
-      editable: !isStatic, // dynamic can be edited
-      local: false,        // server-configured
+      value: isStatic ? serverValue : localVar?.value ?? serverValue,
+      editable: !isStatic,
+      local: false,
     });
 
-    // server var consumed; remove from localByName so only pure locals remain
-    if (localVar) {
-      localByName.delete(name);
-    }
+    localByName.delete(name);
   }
 
-  // 2. PURE LOCAL VARIABLES (not in server schema)
-  for (const [, lv] of localByName) {
-    if (!lv.name) continue;
-
+  for (const lv of localByName.values()) {
     result.push({
+      id: "",
       name: lv.name,
       value: lv.value ?? null,
-      editable: true,
-      local: true,
-    });
-  }
-
-  // 3. ENSURE ONE EMPTY LOCAL ROW
-  const hasEmpty = result.some((v) => isVariableEmpty(v));
-  if (!hasEmpty) {
-    result.push({
-      name: null,
-      value: null,
       editable: true,
       local: true,
     });
@@ -138,9 +105,8 @@ const mergeEnvVars = (
   return result;
 };
 
-// ----------------- VALIDATION LAYER -----------------
 export const validateEnvCache = async (
-  cached: { instance: Environment ; uptime: string } | null,
+  cached: { instance: Environment; uptime: string } | null,
   signal: AbortSignal
 ) => {
   try {
@@ -148,24 +114,17 @@ export const validateEnvCache = async (
     if (signal.aborted) return;
 
     if (pong.uptime !== cached?.uptime) {
-      // server config changed
       const freshEnv = await getEnvironment();
       await envInstanceStorage.save(freshEnv, pong.uptime);
+
       useEnvInstanceStore.getState().setEnv(freshEnv);
 
       const localDB = await envStorage.getAll();
       const merged = mergeEnvVars(freshEnv, localDB);
       useEnvVarsStore.getState().setVars(merged);
     }
-  } catch (err: unknown) {
-    if (
-      err &&
-      typeof err === "object" &&
-      "name" in err &&
-      (err as any).name === "AbortError"
-    ) {
-      return;
-    }
+  } catch (err: any) {
+    if (err?.name === "AbortError") return;
     console.warn("Env validation failed:", err);
   }
 };
