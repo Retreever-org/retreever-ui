@@ -126,8 +126,8 @@ const Sidebar: React.FC = () => {
       {/* Resize handle */}
       <div
         onMouseDown={startResize}
-        className="absolute z-11 top-0 right-0 h-full w-2 cursor-e-resize 
-                   hover:bg-white/5 active:bg-white/10 transition-colors"
+        className="absolute z-11 top-0 right-0 h-full w-0.5 cursor-e-resize 
+                   hover:bg-white/5 active:bg-primary-400/80 transition-colors"
       />
 
       {/* Header */}

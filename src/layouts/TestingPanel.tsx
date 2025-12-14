@@ -6,6 +6,7 @@ import RequestInputController from "./RequestInputController";
 import RequestKeyValueEditor from "../components/canvas/RequestKeyValueEditor";
 import FormEditor from "../components/canvas/FormEditor";
 import CodeEditor from "../components/canvas/CodeEditor";
+import ResponsePanel from "./ResponsePanel";
 
 const TestingPanel: React.FC = () => {
   const { endpoint, tabDoc } = useViewingDocStore();
@@ -17,7 +18,7 @@ const TestingPanel: React.FC = () => {
   const isSecured = endpoint.secured;
 
   return (
-    <section className="flex flex-col gap-4 p-4 bg-transparent text-white rounded-md">
+    <section className="relative h-full flex flex-col gap-4 p-4 bg-transparent text-white rounded-md">
       {/* Title row */}
       <div className="flex items-center justify-between">
         <div className="w-full flex items-center gap-2 pb-3 px-1">
@@ -49,16 +50,17 @@ const TestingPanel: React.FC = () => {
 
       {/* View switches */}
       <RequestInputController />
-      
+
       {/* Key-Value Editor - renders only for headers, params, and form-urlencoded body */}
       <RequestKeyValueEditor />
 
       {/* Form Editor - renders only for body of type form-data */}
       <FormEditor />
 
-      {
-        tabDoc.uiRequest.bodyType === "raw" && tabDoc.uiRequest.editing === "body" && <CodeEditor />
-      }
+      {tabDoc.uiRequest.bodyType === "raw" &&
+        tabDoc.uiRequest.editing === "body" && <CodeEditor />}
+
+      <ResponsePanel />
     </section>
   );
 };

@@ -93,15 +93,13 @@ export function RightDisplayPanel() {
             className="
               absolute left-0 top-0 h-full 
               flex justify-center items-center
-              w-2.5 cursor-ew-resize 
+              w-0.5 cursor-ew-resize 
               bg-transparent
               hover:bg-surface-500/20 
-              active:bg-surface-500/40
+              active:bg-primary-500/80
             "
             onMouseDown={startResize}
-          >
-            <LeftDoubleIcon />
-          </div>
+          />
         </div>
       </div>
     </div>
