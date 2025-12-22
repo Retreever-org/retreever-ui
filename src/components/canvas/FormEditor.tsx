@@ -61,7 +61,7 @@ const FormEditor: React.FC = () => {
     <div className="flex-1 overflow-auto">
       <table className="w-full border-collapse text-xs">
         <thead>
-          <tr className="text-surface-300 bg-black/10">
+          <tr className="text-surface-300">
             <th className="w-6 border border-surface-500/40" />
             <th className="font-medium px-4 py-2 border border-r-0 border-surface-500/40 text-left">
               Name
