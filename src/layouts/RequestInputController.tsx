@@ -1,7 +1,6 @@
 import React from "react";
 import { useViewingDocStore } from "../stores/viewing-doc-store";
 import type { BodyType, EditingType } from "../types/editor.types";
-import ConsumesOption from "../components/canvas/ConsumesOption";
 import RawBodyDropdown from "../components/canvas/RawBodyDropdown";
 
 const BODY_OPTIONS: { key: BodyType; label: string }[] = [
@@ -23,8 +22,7 @@ const RequestInputController: React.FC = () => {
 
   if (!tabDoc) return null;
 
-  const { editing, bodyType, rawType, consumes } = tabDoc.uiRequest;
-  const hasConsumes = consumes && consumes.length > 0;
+  const { editing, bodyType, rawType } = tabDoc.uiRequest;
   const noBodyMethods = ["GET", "DELETE"];
   const noBody = noBodyMethods.includes(
     endpoint?.method.toLocaleUpperCase() || ""
@@ -32,11 +30,7 @@ const RequestInputController: React.FC = () => {
 
   return (
     <div
-      className={`flex ${
-        hasConsumes
-          ? "flex-row items-center justify-start gap-4"
-          : "flex-col justify-center items-start"
-      } text-xs w-full`}
+      className={`flex flex-col justify-center items-start text-xs w-full`}
     >
       {/* Editing tabs */}
       <div className="flex gap-3">
@@ -57,9 +51,9 @@ const RequestInputController: React.FC = () => {
       </div>
 
       {/* Body / Consumes */}
-      {!noBody && hasConsumes && <ConsumesOption />}
+      {/* {!noBody && hasConsumes && <ConsumesOption />} */}
 
-      {!noBody && !hasConsumes && editing === "body" && (
+      {!noBody && editing === "body" && (
         <BodySelector
           value={bodyType}
           onChange={(v) =>
@@ -112,6 +106,9 @@ interface BodySelectorProps {
 }
 
 const BodySelector: React.FC<BodySelectorProps> = ({ value, onChange }) => {
+  const { endpoint } = useViewingDocStore();
+  const hasConsumes = endpoint?.consumes && endpoint.consumes.length > 0;
+
   const selectedStyles = "text-surface-100 shadow-sm";
   const unselectedStyles = "text-surface-300 hover:text-surface-100";
 
@@ -124,8 +121,9 @@ const BodySelector: React.FC<BodySelectorProps> = ({ value, onChange }) => {
             <button
               key={opt.key}
               onClick={() => onChange(opt.key)}
+              disabled={hasConsumes}
               type="button"
-              className={`inline-flex items-center gap-1.5 py-1.5 text-xs transition-colors ${
+              className={`inline-flex items-center gap-1.5 py-1.5 text-xs transition-colors disabled:cursor-not-allowed ${
                 selected ? selectedStyles : unselectedStyles
               }`}
               aria-pressed={selected}

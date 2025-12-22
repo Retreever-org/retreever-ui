@@ -18,11 +18,12 @@ const RawBodyDropdown: React.FC = () => {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  const { tabDoc, updateUiRequest } = useViewingDocStore();
+  const { endpoint, tabDoc, updateUiRequest } = useViewingDocStore();
 
   const ui = tabDoc?.uiRequest;
   if (!ui || ui.bodyType !== "raw") return null;
 
+  const hasConsumes = endpoint?.consumes && endpoint?.consumes.length > 0;
   const value = ui.rawType ?? "JSON";
   const options: RawBodyType[] = ["text", "JSON", "XML", "HTML", "JavaScript"];
 
@@ -53,12 +54,13 @@ const RawBodyDropdown: React.FC = () => {
     <div ref={rootRef} className="relative inline-block text-xs">
       <button
         type="button"
+        disabled={hasConsumes}
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
         className="h-8 px-3 rounded-md flex items-center gap-2
                    text-surface-100 bg-surface-700
-                   border border-surface-600 outline-none"
+                   border border-surface-600 outline-none disabled:cursor-not-allowed"
       >
         <span className="whitespace-nowrap">{value}</span>
         <svg
@@ -84,7 +86,7 @@ const RawBodyDropdown: React.FC = () => {
           role="listbox"
           aria-label="Raw body type"
           className="absolute right-0 mt-2 min-w-[120px] z-50 rounded-md
-                     border border-surface-500/50 bg-black/20 p-1"
+                     border border-surface-500/50 bg-surface-700 p-1"
         >
           {options.map((opt) => (
             <button
