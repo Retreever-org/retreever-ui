@@ -26,9 +26,13 @@ const ResponsePanel: React.FC = () => {
   }, []);
 
   const onMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
     draggingRef.current = true;
     startYRef.current = e.clientY;
     startHeightRef.current = height;
+
+    document.body.style.userSelect = "none"; // block selection
+    document.body.style.cursor = "n-resize"; // change cursor
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
@@ -45,6 +49,10 @@ const ResponsePanel: React.FC = () => {
 
   const onMouseUp = () => {
     draggingRef.current = false;
+
+    document.body.style.userSelect = "";
+    document.body.style.cursor = "";
+
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
   };
