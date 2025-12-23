@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useViewingDocStore } from "../../stores/viewing-doc-store";
 import type { FormEntry } from "../../types/editor.types";
 import { CheckIcon2, DeleteIcon } from "../../svgs/svgs";
@@ -30,13 +30,31 @@ const ensureTrailingEmpty = (rows: FormEntry[]): FormEntry[] => {
 /* ---------------- component ---------------- */
 
 const FormEditor: React.FC = () => {
+  const [multipleRowsEmpty, setMultipleRowsEmpty] = useState<boolean>(false);
   const { tabDoc, updateUiRequest } = useViewingDocStore();
   if (!tabDoc) return null;
 
   const { editing, bodyType, body } = tabDoc.uiRequest;
   if (editing !== "body" || bodyType !== "form-data") return null;
 
-  const rows = body.formData ?? [];
+  const rows = ensureTrailingEmpty(body.formData ?? []);
+
+  useEffect(() => {
+    const normalized = ensureTrailingEmpty(body.formData ?? []);
+    if (normalized !== body.formData) {
+      updateUiRequest({
+        body: {
+          ...body,
+          formData: normalized,
+        },
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const emptyRowCount = rows.filter(isEmptyRow).length;
+    setMultipleRowsEmpty(emptyRowCount > 1);
+  }, [rows]);
 
   const updateRows = (next: FormEntry[]) => {
     updateUiRequest({
@@ -165,7 +183,7 @@ const FormEditor: React.FC = () => {
 
                 {/* DELETE */}
                 <td className="border border-l-0 border-surface-500/40 text-right px-2">
-                  {row.local && !empty && (
+                  {row.local && (!empty || multipleRowsEmpty) && (
                     <button
                       onClick={() => deleteRow(index)}
                       className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300"
